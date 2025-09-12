@@ -1,0 +1,92 @@
+plugins {
+    id 'org.asciidoctor.jvm.convert' version '4.0.2'
+    id 'org.asciidoctor.jvm.pdf' version '4.0.2'
+}
+
+// Project configuration for AsciiDoc-MCP
+version = '1.0.0'
+description = 'AsciiDoc MCP Server - Architecture Documentation'
+
+repositories {
+    mavenCentral()
+}
+
+asciidoctor {
+    inputs.files fileTree('src/docs')
+    
+    sourceDir file('src/docs')
+    sources {
+        include 'arc42/arc42.adoc'
+    }
+    
+    outputDir file('build/docs/html5')
+    
+    attributes \
+        'source-highlighter': 'highlight.js',
+        'toc': 'left',
+        'toclevels': '3',
+        'sectnums': '',
+        'icons': 'font',
+        'imagesdir': 'images',
+        'sectanchors': '',
+        'idprefix': '',
+        'idseparator': '-',
+        'docinfo1': '',
+        'linkcss': '',
+        'copycss': ''
+}
+
+asciidoctorPdf {
+    inputs.files fileTree('src/docs')
+    
+    sourceDir file('src/docs')
+    sources {
+        include 'arc42/arc42.adoc'
+    }
+    
+    outputDir file('build/docs/pdf')
+    
+    attributes \
+        'source-highlighter': 'rouge',
+        'toc': '',
+        'toclevels': '3',
+        'sectnums': '',
+        'icons': 'font',
+        'imagesdir': 'images',
+        'sectanchors': '',
+        'idprefix': '',
+        'idseparator': '-'
+}
+
+// Task dependencies
+asciidoctor.dependsOn('copyImages')
+asciidoctorPdf.dependsOn('copyImages')
+
+// Copy images to output directories
+task copyImages(type: Copy) {
+    from 'src/docs/images'
+    into 'build/docs/html5/images'
+}
+
+task copyImagesPdf(type: Copy) {
+    from 'src/docs/images'
+    into 'build/docs/pdf/images'
+}
+
+asciidoctorPdf.dependsOn('copyImagesPdf')
+
+// Generate both HTML and PDF
+task generateDocs {
+    dependsOn asciidoctor, asciidoctorPdf
+}
+
+task generateHTML {
+    dependsOn asciidoctor
+}
+
+task generatePDF {
+    dependsOn asciidoctorPdf
+}
+
+// Default task
+defaultTasks 'generateDocs'

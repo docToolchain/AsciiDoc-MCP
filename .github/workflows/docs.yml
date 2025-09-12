@@ -1,0 +1,52 @@
+name: Generate Documentation
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+    
+    - name: Cache docToolchain
+      uses: actions/cache@v4
+      with:
+        path: ~/.doctoolchain
+        key: ${{ runner.os }}-doctoolchain-${{ hashFiles('dtcw') }}
+        restore-keys: |
+          ${{ runner.os }}-doctoolchain-
+    
+    - name: Make dtcw executable
+      run: chmod +x ./dtcw
+    
+    - name: Install docToolchain
+      run: ./dtcw local install doctoolchain
+    
+    - name: Generate HTML Documentation
+      run: ./dtcw generateHTML
+    
+    - name: Upload documentation artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: documentation
+        path: build/docs/
+        retention-days: 30
+    
+    - name: Deploy to GitHub Pages (main branch only)
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      uses: peaceiris/actions-gh-pages@v4
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./build/docs/html5
+        destination_dir: docs
