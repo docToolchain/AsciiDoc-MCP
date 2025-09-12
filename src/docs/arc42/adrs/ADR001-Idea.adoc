@@ -1,0 +1,117 @@
+= ADR-001: Bereitstellung strukturierter AsciiDoc-Unterstützung für LLMs: Eigenständiger AsciiDoc-MCP-Server
+
+|===
+| Datum:    | 2025-09-12
+| Autoren:  | Claude & rdmueller
+| Status:   | Draft
+|===
+
+== Problem Description and Context
+
+Aktuell existiert keine strukturierte Möglichkeit, AsciiDoc-Dokumentation für Large Language Models (LLMs) semantisch zugänglich zu machen. LLMs können zwar AsciiDoc-Text lesen, haben aber keinen Zugang zu strukturellen Informationen wie:
+
+* Dokumenthierarchien und Include-Dependencies
+* Cross-Reference-Validierung
+* Asset-Beziehungen (Bilder, Diagramme)
+* Modulare Dokumentationsstrukturen
+
+Bestehende Lösungen wie Serena fokussieren sich auf Code-Intelligence durch Language Server Protocol (LSP), während AsciiDoc-spezifische LSP-Implementierungen noch nicht produktionsreif sind.
+
+**Technische Constraints:**
+
+* Model Context Protocol (MCP) als Standard für LLM-Tool-Integration etabliert
+* Serena unterstützt nur einen Language Server pro Projekt
+* AsciiDoc-LSP-Landschaft ist fragmentiert und unreif
+* Dokumentation wird häufig parallel zu Code in gemischten Projekten verwendet
+
+== Alternative Evaluation (Pugh Matrix)
+
+|===
+| Kriterium | Status Quo | Serena-Erweiterung | Eigenständiger AsciiDoc-MCP
+| Entwicklungsaufwand | 0 | 0 | -1
+| Wartungsaufwand | 0 | +1 | -1
+| Spezialisierung | 0 | -1 | +1
+| Multi-Language-Support | 0 | -1 | +1
+| Community-Adoption | 0 | +1 | 0
+| Architekturelle Sauberkeit | 0 | -1 | +1
+| Integration mit Code-Projekten | 0 | +1 | +1
+| Unabhängige Evolution | 0 | -1 | +1
+| **Total Score** | **0** | **-1** | **+3**
+|===
+
+=== Rejected Alternatives
+
+**Serena-Erweiterung:** Abgelehnt aufgrund der Ein-Language-Server-Limitation von Serena und architektonischer Kompromisse bei dokumentations-spezifischen Features.
+
+**AsciiDoc-LSP-Integration:** Abgelehnt aufgrund unreifer LSP-Implementierungen in der AsciiDoc-Landschaft.
+
+== Decision
+
+**Entwicklung eines eigenständigen AsciiDoc-MCP-Servers** als spezialisierte Lösung für strukturierte AsciiDoc-Unterstützung.
+
+Der MCP-Server wird parallel zu Serena in gemischten Code-/Dokumentationsprojekten eingesetzt, wobei jeder MCP seine Domäne optimal unterstützt:
+
+* **Serena**: Code-Intelligence, Refactoring, Symbol-Navigation
+* **AsciiDoc-MCP**: Dokumentationsstruktur, Content-Management, Cross-Reference-Validierung
+
+=== Parallele MCP-Konfiguration
+
+[source,json]
+----
+{
+  "mcpServers": {
+    "serena": {
+      "command": "uvx",
+      "args": ["--from", "git+https://github.com/oraios/serena", "serena-mcp-server"]
+    },
+    "asciidoc-mcp": {
+      "command": "uvx", 
+      "args": ["--from", "git+https://github.com/your-org/asciidoc-mcp", "asciidoc-mcp-server"]
+    }
+  }
+}
+----
+
+== Consequences
+
+=== Positive Effects
+
+* **Specialization**: Optimal tools for AsciiDoc-specific workflows
+* **Combined Workflows**: LLMs can orchestrate both MCPs for code/documentation tasks
+* **Independent Evolution**: Separate development cycles without mutual dependencies
+* **Clean Architecture**: No compromises in tool design
+* **Multi-Format Potential**: Foundation for additional markup formats (Markdown, etc.)
+
+=== Risks
+
+* **Development Effort**: Complete custom development required
+* **Community Building**: Need to build own user base
+* **Coordination Overhead**: Multi-MCP workflows must be established
+* **Fragmentation**: Potential confusion from multiple MCP servers
+
+=== Technical Debt
+
+* **Parsing Complexity**: AsciiDoc parser must support robust include resolution and attribute handling
+* **Multi-Format Maintenance**: Potential extension to additional markup formats increases complexity
+* **Memory Management**: Coordination between different MCP memory systems
+* **Performance**: Parallel MCP processes may increase resource consumption
+
+== Core Functionality of AsciiDoc MCP
+
+The AsciiDoc MCP Server will provide the following basic tools:
+
+* `analyze_document_structure` - Parse heading hierarchy
+* `find_includes` - Resolve include directives and dependencies
+* `validate_cross_references` - Check internal cross-references
+* `search_content` - Semantic search in AsciiDoc content
+* `extract_metadata` - Document attributes and configuration
+* `analyze_assets` - Images, diagrams and other embedded assets
+
+== Additional Information
+
+**References:**
+* https://github.com/oraios/serena[Serena MCP Server]
+* https://docs.asciidoctor.org/[AsciiDoc Language Documentation]
+* https://spec.modelcontextprotocol.io/[Model Context Protocol Specification]
+
+**Note on arc42 Integration:** This ADR deliberately remains general and avoids arc42-specific features to ensure broader applicability. Template-specific extensions can be addressed in subsequent ADRs.
