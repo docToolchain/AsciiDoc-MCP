@@ -1,0 +1,79 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "asciidoc-mcp"
+version = "0.1.0"
+description = "A Model Context Protocol (MCP) server for AsciiDoc document analysis and processing"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "docToolchain", email = "info@doctoolchain.org"},
+]
+keywords = ["asciidoc", "mcp", "documentation", "llm"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Text Processing :: Markup",
+]
+
+dependencies = [
+    "mcp>=1.0.0",
+    "pydantic>=2.0.0",
+    "click>=8.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
+    "black>=23.0.0",
+    "mypy>=1.0.0",
+    "ruff>=0.1.0",
+]
+
+[project.scripts]
+asciidoc-mcp-server = "asciidoc_mcp.cli:cli_main"
+
+[project.urls]
+Homepage = "https://github.com/docToolchain/AsciiDoc-MCP"
+Repository = "https://github.com/docToolchain/AsciiDoc-MCP"
+Documentation = "https://github.com/docToolchain/AsciiDoc-MCP/blob/main/README.md"
+Issues = "https://github.com/docToolchain/AsciiDoc-MCP/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-dir]
+"" = "src"
+
+[tool.black]
+line-length = 88
+target-version = ['py38']
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+
+[tool.ruff]
+line-length = 88
+target-version = "py38"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "B", "I", "N", "UP"]
+ignore = []
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]

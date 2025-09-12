@@ -1,0 +1,51 @@
+= Sample AsciiDoc Document
+:author: docToolchain Team
+:email: info@doctoolchain.org
+:revnumber: 1.0.0
+:revdate: 2025-01-01
+:description: A sample document to demonstrate AsciiDoc MCP server functionality
+
+This is a sample AsciiDoc document to demonstrate the functionality of the AsciiDoc MCP server.
+
+== Introduction
+
+This document serves as a test case for various AsciiDoc features that the MCP server can analyze.
+
+=== Document Structure
+
+The MCP server can analyze the hierarchical structure of AsciiDoc documents, including:
+
+* Heading levels and nesting
+* Section organization
+* Content extraction
+
+=== Include Directives
+
+AsciiDoc supports including other documents:
+
+include::src/docs/arc42/adrs/ADR001-Idea.adoc[]
+
+== Features
+
+The AsciiDoc MCP server provides several core features:
+
+=== Document Analysis
+
+* Parse heading hierarchy
+* Extract document metadata
+* Analyze document structure
+
+=== Content Search
+
+The server can search through document content and provide context around matches.
+
+=== Include Resolution
+
+The server can find and resolve include directives, mapping document dependencies.
+
+== Conclusion
+
+This sample demonstrates the various features that can be analyzed by the AsciiDoc MCP server.
+
+[NOTE]
+This is a note block that contains additional information.
