@@ -61,9 +61,78 @@ The title of the table is the name of your system, the three columns contain the
 ****
 endif::arc42help[]
 
-**<Diagram or Table>**
+=== Business Context
 
-**<optionally: Explanation of external domain interfaces>**
+ifdef::arc42help[]
+[role="arc42help"]
+****
+.Contents
+Specification of *all* communication partners (users, IT-systems, ...) with explanations of domain specific inputs and outputs or interfaces.
+Optionally you can add domain specific formats or communication protocols.
+
+.Motivation
+All stakeholders should understand which data are exchanged with the environment of the system.
+
+.Form
+All kinds of diagrams that show the system as a black box and specify the domain interfaces to communication partners.
+
+Alternatively (or additionally) you can use a table.
+The title of the table is the name of your system, the three columns contain the name of the communication partner, the inputs, and the outputs.
+
+****
+endif::arc42help[]
+
+[plantuml, business-context, svg]
+----
+@startuml
+!theme plain
+
+rectangle "LLM Clients\n(Claude, etc.)" as LLM
+rectangle "AsciiDoc MCP\nServer" as MCP
+storage "File System\n(AsciiDoc Documents)" as FS
+
+LLM -right-> MCP : MCP Protocol
+LLM <-right- MCP : Tool Responses
+MCP -down-> FS : File System Access
+
+@enduml
+----
+
+[options="header",cols="2,3,3"]
+|===
+|Communication Partner|Inputs to AsciiDoc MCP|Outputs from AsciiDoc MCP
+|**LLM Clients** +
+(Claude Desktop, OpenAI GPT, custom clients)|• Tool invocation requests via MCP protocol +
+• File paths for analysis +
+• Search queries and parameters +
+• Configuration options (recursive includes, content inclusion)|• Structured document analysis results +
+• Hierarchical heading structures +
+• Include dependency graphs +
+• Document metadata and attributes +
+• Search results with context +
+• Error messages and status information
+
+|**File System** +
+(Local directories, mounted volumes)|• AsciiDoc documents (.adoc, .ad files) +
+• Include files and dependencies +
+• Image and asset references +
+• Configuration files (if any)|• Read-only access only +
+• No file modifications +
+• Temporary processing artifacts (in-memory)
+
+|**Documentation Repositories** +
+(Git repos, project directories)|• Project-wide documentation structures +
+• Multi-file documentation projects +
+• Version-controlled content|• Cross-file analysis results +
+• Dependency mapping +
+• Repository-wide search capabilities
+|===
+
+**Key Business Capabilities:**
+
+* **Document Intelligence**: Transform unstructured AsciiDoc text into structured, queryable information for LLM consumption
+* **Workflow Integration**: Enable LLMs to understand and reason about documentation as part of broader software development tasks  
+* **Knowledge Navigation**: Provide semantic access to complex documentation hierarchies and cross-references
 
 === Technical Context
 
@@ -83,8 +152,85 @@ together with a mapping table showing the relationships between channels and inp
 ****
 endif::arc42help[]
 
-**<Diagram or Table>**
+=== Technical Context
 
-**<optionally: Explanation of technical interfaces>**
+ifdef::arc42help[]
+[role="arc42help"]
+****
+.Contents
+Technical interfaces (channels and transmission media) linking your system to its environment. In addition a mapping of domain specific input/output to the channels, i.e. an explanation which I/O uses which channel.
 
-**<Mapping Input/Output to Channels>**
+.Motivation
+Many stakeholders make architectural decision based on the technical interfaces between the system and its context. Especially infrastructure or hardware designers decide these technical interfaces.
+
+.Form
+E.g. UML deployment diagram describing channels to neighboring systems,
+together with a mapping table showing the relationships between channels and input/output.
+
+****
+endif::arc42help[]
+
+[plantuml, technical-context, svg]
+----
+@startuml
+!theme plain
+
+rectangle "MCP Client\nApplication" as Client
+rectangle "AsciiDoc MCP\nServer" as Server
+storage "Local File\nSystem" as FS
+
+Client -right-> Server : MCP over stdio/JSON-RPC
+Client <-right- Server : Tool calls & responses
+Server -down-> FS : OS File API\n(Python pathlib)
+
+@enduml
+----
+
+**Technical Interface Specifications:**
+
+[options="header",cols="2,2,3"]
+|===
+|Channel|Protocol/Technology|Description
+|**MCP Communication**|JSON-RPC over stdio +
+Transport: stdin/stdout pipes|• Bidirectional communication for tool calls +
+• Standard MCP protocol compliance +
+• Asynchronous request/response pattern +
+• Error handling via JSON-RPC error responses
+
+|**File System Access**|Python os/pathlib APIs +
+Encoding: UTF-8|• Read-only file operations +
+• Recursive directory traversal +
+• MIME type detection for AsciiDoc files +
+• Memory-efficient streaming for large files
+
+|**Process Execution**|OS process management +
+Container: Optional Docker|• Single process model (no child processes) +
+• Standard exit codes for error conditions +
+• Signal handling for graceful shutdown +
+• Resource monitoring and limits
+|===
+
+**Deployment Channels:**
+
+[options="header",cols="2,3,2"]
+|===
+|Deployment Mode|Technical Channel|I/O Mapping
+|**Local Execution**|Direct Python process +
+Command: `asciidoc-mcp-server`|stdio ↔ MCP protocol +
+File paths ↔ Local filesystem
+
+|**Docker Container**|Containerized process +
+Image: `doctoolchain/asciidoc-mcp`|stdio ↔ MCP protocol +
+Mounted volumes ↔ Document access
+
+|**uvx Installation**|Package manager execution +
+Command: `uvx asciidoc-mcp`|stdio ↔ MCP protocol +
+User directory ↔ Document scope
+|===
+
+**Protocol Details:**
+* **MCP Version**: 1.0+ compatibility
+* **JSON Schema**: Full tool schema validation  
+* **Error Codes**: Standard HTTP-style error codes (400, 404, 500)
+* **Encoding**: UTF-8 for all text content
+* **Resource Limits**: 10MB max file size, 1000 max include depth

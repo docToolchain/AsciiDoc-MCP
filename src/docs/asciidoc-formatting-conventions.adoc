@@ -1,0 +1,224 @@
+= AsciiDoc Formatting Conventions for Architecture Documentation
+:description: Style guidelines and formatting rules for maintaining consistent AsciiDoc documentation
+
+This document defines the formatting conventions and style guidelines for maintaining consistent AsciiDoc documentation across the project.
+
+== Table Formatting Rules
+
+=== Column Width Guidelines
+
+When creating tables, use appropriate column width proportions based on content:
+
+* **Score columns**: Use width `1` for short numeric values
+* **Name/ID columns**: Use width `1-2` for short identifiers
+* **Description columns**: Use width `3-4` for detailed explanations
+* **Multi-purpose columns**: Use width `2-3` for moderate content
+
+.Examples
+
+* For comparison tables with scores: `cols="2,4,4,1"`
+* For quality scenarios: `cols="1,2,3,3"`
+* For simple name-description: `cols="2,3"`
+
+=== List Formatting in Table Cells
+
+When including AsciiDoc lists within table cells:
+
+1. **Use `a|` cell prefix**: Mark the cell as containing AsciiDoc content
+2. **Use proper list markers**: Use `*` for unordered lists, `1.` for ordered lists
+3. **No line continuation**: Avoid `+` line continuation in table cells
+
+.Correct Format
+```
+|===
+|Column1|Column2
+
+|Simple text
+a|* First item
+* Second item
+* Third item
+|===
+```
+
+.Incorrect Format
+```
+|===
+|Column1|Column2
+
+|Simple text
+|• First item +
+• Second item +
+• Third item
+|===
+```
+
+== Heading and Section Formatting
+
+=== Title Headings vs Bold Text
+
+Use `.title` headings instead of bold text for document structure:
+
+.Correct Format
+```
+.Technology Components
+
+* Runtime: Python 3.8+
+* Protocol: MCP 1.0+
+* Architecture: Standalone server
+
+.Implementation Notes
+
+Details follow here...
+```
+
+.Incorrect Format
+```
+**Technology Components:**
+- Runtime: Python 3.8+
+- Protocol: MCP 1.0+
+- Architecture: Standalone server
+
+**Implementation Notes:**
+Details follow here...
+```
+
+=== Empty Lines Before Lists
+
+Always add an empty line before lists to ensure proper rendering:
+
+.Correct Format
+```
+The following options are available:
+
+* Option A
+* Option B
+* Option C
+```
+
+.Incorrect Format
+```
+The following options are available:
+* Option A
+* Option B
+* Option C
+```
+
+== Section Structure Guidelines
+
+=== ADR Document Format
+
+Architecture Decision Records should follow this structure:
+
+```
+= ADR-XXX: Decision Title
+
+|===
+| Datum:    | YYYY-MM-DD
+| Autoren:  | Author Name
+| Status:   | Accepted/Proposed/Superseded
+|===
+
+== Problem
+
+Description of the problem or decision needed.
+
+== Alternatives Considered
+
+[options="header",cols="2,4,4,1"]
+|===
+|Alternative|Pros|Cons|Score
+
+|Option 1
+a|* Benefit 1
+* Benefit 2
+a|* Drawback 1
+* Drawback 2
+|+2
+
+|Option 2
+a|* Benefit 1
+a|* Major drawback
+* Minor issue
+|-1
+|===
+
+== Decision
+
+Clear statement of the chosen approach.
+
+.Key Components
+
+* Component A: Description
+* Component B: Description
+
+== Rationale
+
+.Primary Benefits
+
+* Benefit explanation
+* Impact description
+
+.Secondary Considerations
+
+* Additional factors
+* Risk mitigation
+
+== Consequences
+
+=== Positive Effects
+
+* Positive outcome 1
+* Positive outcome 2
+
+=== Trade-offs
+
+* Trade-off 1
+* Trade-off 2
+
+=== Risks
+
+* Risk 1 with mitigation
+* Risk 2 with monitoring
+```
+
+=== Chapter Documentation Format
+
+Arc42 chapters should use consistent formatting:
+
+* Use `.title` for subsection headings within content
+* Provide empty lines before lists
+* Use appropriate table column widths
+* Mark cells with AsciiDoc content using `a|`
+* Use numbered or bulleted lists consistently
+
+== Quality Assurance
+
+=== Validation Checklist
+
+Before committing documentation changes:
+
+- [ ] Table columns use appropriate width ratios
+- [ ] Lists in table cells use `a|` prefix and proper markers
+- [ ] Bold text converted to `.title` headings where appropriate
+- [ ] Empty lines precede all lists
+- [ ] Consistent heading hierarchy maintained
+- [ ] No line continuation (`+`) in table cells
+
+=== Common Mistakes to Avoid
+
+1. **Unbalanced table columns**: Don't use equal width (`2,2,2,2`) for different content types
+2. **Missing `a|` prefix**: Lists in table cells render incorrectly without AsciiDoc cell marking
+3. **Bold text as headings**: Use `.title` instead of `**bold text:**` for structure
+4. **Missing empty lines**: Lists need separation from preceding text
+5. **Inconsistent list markers**: Use `*` for bullets, `1.` for numbered lists consistently
+
+== Implementation Notes
+
+These conventions ensure:
+
+* Consistent visual formatting across all documentation
+* Proper AsciiDoc rendering in all supported output formats
+* Maintainable and readable source files
+* Professional appearance in generated documentation
+
+For questions about specific formatting cases not covered here, refer to the official AsciiDoc User Manual or ask in the project documentation channels.

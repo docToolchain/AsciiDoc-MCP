@@ -77,18 +77,54 @@ In the best case you will get away with examples or simple signatures.
 ****
 endif::arc42help[]
 
-_**<Overview Diagram>**_
+[plantuml, whitebox-overall, svg]
+----
+@startuml
+!theme plain
+
+package "AsciiDoc MCP Server" {
+  rectangle "MCP Server\nHandler" as Handler
+  rectangle "AsciiDoc Processor" as Processor
+  rectangle "Tool Handlers" as Tools
+  rectangle "File System\nAccess" as FileAccess
+  
+  Handler <-> Processor : delegates to
+  Processor <-> FileAccess : file I/O
+  Tools <-> FileAccess : file I/O
+  Handler -> Tools : invokes
+}
+
+rectangle "MCP Client\n(Claude, etc)" as Client
+
+Client -> Handler : stdio transport\nJSON-RPC MCP Protocol
+
+@enduml
+----
 
 Motivation::
 
-_<text explanation>_
-
+The system follows a layered architecture with clear separation of concerns:
+- **Protocol handling** is isolated from business logic for maintainability
+- **Core processing** is centralized to ensure consistency across all tools  
+- **File access** is abstracted to enable testing and future caching strategies
+- **Tool handlers** provide type-safe interfaces between MCP and processing logic
 
 Contained Building Blocks::
-_<Description of contained building block (black boxes)>_
 
-Important Interfaces::
-_<Description of important interfaces>_
+[cols="2,3" options="header"]
+|===
+| **Building Block** | **Responsibility**
+| **MCP Server Handler** | Protocol compliance, request routing, response formatting, error handling
+| **Tool Handlers** | Input validation, schema enforcement, output transformation for each MCP tool
+| **AsciiDoc Processor** | Core document analysis logic, parsing, structure extraction, content search
+| **File System Access** | Secure file I/O, path validation, encoding handling, resource management
+|===
+
+.Important Interfaces
+
+* **MCP Protocol Interface**: JSON-RPC over stdio, strict schema compliance
+* **Tool API Interface**: Async Python methods with typed parameters and return values  
+* **File System Interface**: Read-only access with UTF-8 encoding and error handling
 
 ifdef::arc42help[]
 [role="arc42help"]
@@ -112,7 +148,7 @@ Its headline is the name of the black box.
 ****
 endif::arc42help[]
 
-==== <Name black box 1>
+==== MCP Server Handler
 
 ifdef::arc42help[]
 [role="arc42help"]
@@ -130,17 +166,31 @@ according the the following black box template:
 ****
 endif::arc42help[]
 
-_<Purpose/Responsibility>_
+.Purpose/Responsibility
 
-_<Interface(s)>_
+Manages the Model Context Protocol communication layer, providing the bridge between LLM clients and the AsciiDoc processing capabilities. Handles protocol compliance, request lifecycle management, and response formatting.
 
-_<(Optional) Quality/Performance Characteristics>_
+.Interface(s)
 
-_<(Optional) Directory/File Location>_
+* **Input**: JSON-RPC requests via stdin (tool calls, server introspection)
+* **Output**: JSON-RPC responses via stdout (tool results, error messages)  
+* **Internal**: Delegates to Tool Handlers for request processing
 
-_<(Optional) Fulfilled Requirements>_
+.Quality/Performance Characteristics
 
-_<(optional) Open Issues/Problems/Risks>_
+* **Reliability**: Comprehensive error handling with graceful degradation
+* **Performance**: Stateless processing enables concurrent request handling
+* **Protocol Compliance**: Full MCP 1.0+ specification adherence
+
+.Directory/File Location
+
+`src/asciidoc_mcp/server.py` - Main server implementation and request routing
+
+.Fulfilled Requirements
+
+* MCP protocol compatibility for LLM integration
+* Error handling and status reporting
+* Tool discovery and schema validation
 
 
 
@@ -175,7 +225,7 @@ Leave out normal, simple, boring or standardized parts of your system
 ****
 endif::arc42help[]
 
-==== White Box _<building block 1>_
+==== White Box AsciiDoc Processor
 
 ifdef::arc42help[]
 [role="arc42help"]
@@ -184,19 +234,47 @@ ifdef::arc42help[]
 ****
 endif::arc42help[]
 
-_<white box template>_
+The AsciiDoc Processor is the most complex building block, containing the core document analysis algorithms. It deserves detailed explanation due to its complexity and importance for system functionality.
 
-==== White Box _<building block 2>_
+```
+                            AsciiDoc Processor
+┌─────────────────────────────────────────────────────────────────────┐
+│                                                                     │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐      │
+│  │                 │  │                 │  │                 │      │
+│  │ Document Parser │  │ Structure       │  │ Include         │      │
+│  │                 │  │ Analyzer        │  │ Resolver        │      │
+│  │                 │  │                 │  │                 │      │
+│  └─────────────────┘  └─────────────────┘  └─────────────────┘      │
+│                                                                     │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐      │
+│  │                 │  │                 │  │                 │      │
+│  │ Metadata        │  │ Content         │  │ Error           │      │
+│  │ Extractor       │  │ Searcher        │  │ Handler         │      │
+│  │                 │  │                 │  │                 │      │
+│  └─────────────────┘  └─────────────────┘  └─────────────────┘      │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+```
 
+**Contained Building Blocks:**
 
-_<white box template>_
+[cols="2,3" options="header"]
+|===
+| **Component** | **Responsibility**
+| **Document Parser** | Raw AsciiDoc text processing, tokenization, syntax validation
+| **Structure Analyzer** | Heading hierarchy extraction, section organization, tree building
+| **Include Resolver** | Include directive discovery, recursive resolution, dependency tracking
+| **Metadata Extractor** | Document attributes, author info, revision details extraction
+| **Content Searcher** | Text search, context extraction, result ranking and formatting
+| **Error Handler** | Graceful error recovery, structured error reporting, validation
+|===
 
-...
+.Internal Interfaces
 
-==== White Box _<building block m>_
-
-
-_<white box template>_
+* **Parser Interface**: Text input → Token stream
+* **Analysis Interface**: Tokens → Structured data
+* **File Interface**: Path resolution → Content streams
 
 
 

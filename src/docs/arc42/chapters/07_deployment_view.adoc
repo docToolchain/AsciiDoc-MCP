@@ -70,18 +70,132 @@ For multiple environments or alternative deployments please copy and adapt this 
 ****
 endif::arc42help[]
 
-_**<Overview Diagram>**_
+=== Infrastructure Level 1
 
-Motivation::
+ifdef::arc42help[]
+[role="arc42help"]
+****
+Describe (usually in a combination of diagrams, tables, and text):
 
-_<explanation in text form>_
+* distribution of a system to multiple locations, environments, computers, processors, .., as well as physical connections between them
+* important justifications or motivations for this deployment structure
+* quality and/or performance features of this infrastructure
+* mapping of software artifacts to elements of this infrastructure
 
-Quality and/or Performance Features::
+For multiple environments or alternative deployments please copy and adapt this section of arc42 for all relevant environments.
+****
+endif::arc42help[]
 
-_<explanation in text form>_
+==== Local Development Environment
 
-Mapping of Building Blocks to Infrastructure::
-_<description of the mapping>_
+```
+                    Developer Workstation
+┌─────────────────────────────────────────────────────────────────┐
+│                           Local OS                             │
+│  ┌─────────────────┐                    ┌─────────────────────┐  │
+│  │                 │     stdio pipes    │                     │  │
+│  │   MCP Client    │◄──────────────────►│  AsciiDoc MCP       │  │
+│  │ (Claude Desktop)│                    │     Server          │  │
+│  │                 │                    │                     │  │
+│  └─────────────────┘                    └─────────────────────┘  │
+│                                                    │             │
+│                                                    │ file I/O    │
+│                                                    ▼             │
+│                                          ┌─────────────────────┐  │
+│                                          │                     │  │
+│                                          │ Local File System   │  │
+│                                          │  ~/docs/*.adoc      │  │
+│                                          │                     │  │
+│                                          └─────────────────────┘  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+.Motivation
+
+Local development deployment optimizes for:
+
+* **Zero Network Latency**: Direct file system access eliminates network overhead
+* **Developer Privacy**: Documents remain on local machine, no external transmission  
+* **Simple Setup**: Single command installation with no additional infrastructure
+* **IDE Integration**: Works alongside existing development tools and workflows
+
+.Quality and/or Performance Features
+
+[cols="2,3" options="header"]
+|===
+| **Quality Attribute** | **Implementation**
+| **Performance** | Direct file access: < 100ms response times for typical documents
+| **Security** | No network exposure, read-only file access, user permission boundaries
+| **Availability** | 99.9% uptime (depends only on local machine stability)
+| **Scalability** | Single user, processes up to 10MB documents efficiently
+| **Maintainability** | Self-contained deployment, automatic dependency management
+|===
+
+**Mapping of Building Blocks to Infrastructure:**
+
+[cols="2,2,2" options="header"]
+|===
+| **Software Component** | **Infrastructure Element** | **Deployment Artifact**
+| **MCP Server Handler** | Python Process | `asciidoc-mcp-server` executable
+| **AsciiDoc Processor** | Process Memory Space | Python modules in site-packages
+| **File System Access** | OS File API | Standard library + pathlib
+| **Tool Handlers** | Process Thread Pool | Async event loop handlers
+|===
+
+==== Docker Container Environment  
+
+```
+                      Host Machine
+┌─────────────────────────────────────────────────────────────────┐
+│                                                                 │
+│  ┌─────────────────┐    ┌─────────────────────────────────────┐  │
+│  │                 │    │          Docker Container          │  │
+│  │   MCP Client    │    │                                   │  │
+│  │ (Claude Desktop)│◄───┼─► AsciiDoc MCP Server Process    │  │
+│  │                 │    │                                   │  │
+│  └─────────────────┘    │         │ volume mount          │  │
+│                         │         ▼                       │  │
+│  ┌─────────────────────┐ │   ┌─────────────────────────┐     │  │
+│  │                     │ │   │                         │     │  │
+│  │ Host File System    │◄┼──►│ Container File System   │     │  │
+│  │  ~/docs/           │ │   │  /workspace/docs/       │     │  │
+│  │                     │ │   │                         │     │  │
+│  └─────────────────────┘ │   └─────────────────────────┘     │  │
+│                         └─────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+.Motivation
+
+Containerized deployment provides:
+
+* **Environment Isolation**: Consistent runtime regardless of host OS differences
+* **Resource Control**: CPU and memory limits for production environments
+* **Security Boundaries**: Process isolation and controlled filesystem access
+* **CI/CD Integration**: Reproducible builds and automated testing environments
+
+.Quality and/or Performance Features
+
+[cols="2,3" options="header"]
+|===
+| **Quality Attribute** | **Implementation**
+| **Portability** | Runs identically on Linux, macOS, Windows with Docker
+| **Security** | Container isolation, non-root user, read-only filesystem
+| **Resource Management** | Configurable CPU/memory limits, automatic cleanup
+| **Consistency** | Locked dependency versions, reproducible environments
+| **Monitoring** | Container logs, health checks, resource metrics
+|===
+
+**Mapping of Building Blocks to Infrastructure:**
+
+[cols="2,2,2" options="header"]
+|===
+| **Software Component** | **Infrastructure Element** | **Deployment Artifact**
+| **Complete MCP Server** | Docker Container | `doctoolchain/asciidoc-mcp:latest` image
+| **Python Runtime** | Container Base Image | `python:3.12-slim` 
+| **Application Code** | Container Layer | Installed Python package
+| **Document Access** | Volume Mount | Host directory → `/workspace`
+|===
 
 
 === Infrastructure Level 2

@@ -42,3 +42,97 @@ See https://docs.arc42.org/section-4/[Solution Strategy] in the arc42 documentat
 
 ****
 endif::arc42help[]
+
+=== Technology Decisions
+
+The AsciiDoc MCP Server technology stack and architectural patterns are documented in the following Architecture Decision Records:
+
+* **link:../adrs/ADR001-Idea.adoc[ADR-001: Standalone AsciiDoc MCP Server]** - Establishes the fundamental decision to create an independent AsciiDoc MCP server rather than extending existing tools
+* **link:../adrs/ADR002-Technology-Stack.adoc[ADR-002: Technology Stack Selection]** - Documents the selection of Python 3.8+ runtime and MCP protocol adoption
+* **link:../adrs/ADR003-Architecture-Pattern.adoc[ADR-003: Tool-Based Service Architecture]** - Defines the architectural pattern using tool-based services with a central processor
+
+These decisions collectively establish:
+
+[options="header",cols="2,3"]
+|===
+|Decision Area|Selected Approach
+|**Runtime Platform**|Python 3.8+ for ecosystem maturity and cross-platform compatibility
+|**Integration Protocol**|Model Context Protocol (MCP) via JSON-RPC over stdio
+|**System Architecture**|Standalone server independent of other MCP implementations
+|**Service Pattern**|Tool-based architecture with centralized AsciiDoc processor
+|**Deployment Model**|Local execution with optional Docker containerization
+|===
+
+=== Architectural Patterns
+
+The system follows architectural patterns detailed in **link:../adrs/ADR003-Architecture-Pattern.adoc[ADR-003: Tool-Based Service Architecture]**:
+
+**Tool-Based Service Architecture**
+* Each MCP tool represents a distinct document analysis capability
+* Stateless request/response pattern ensures reliability  
+* Clear tool boundaries enable independent feature evolution
+* JSON schema validation provides contract enforcement
+
+**Processor Pattern**
+* Central `AsciiDocProcessor` encapsulates all document analysis logic
+* Individual tools delegate to processor methods for consistency
+* Shared error handling and validation across all operations
+* Enables future caching and optimization strategies
+
+This approach provides the foundation for all quality achievement strategies and deployment models described below.
+
+=== Quality Achievement Strategies
+
+[options="header",cols="2,3"]
+|===
+|Quality Goal|Solution Strategy
+|**Reliability & Robustness**|• Comprehensive input validation at tool boundaries +
+• Graceful degradation for malformed documents +
+• Structured error responses with context +
+• No state persistence between requests
+
+|**Performance & Efficiency**|• Lazy loading of document content +
+• Stream processing for large files +
+• Efficient parsing with minimal memory footprint +
+• Async I/O throughout the request pipeline
+
+|**Usability & Developer Experience**|• Self-documenting tool schemas +
+• Rich error messages with correction hints +
+• Consistent JSON output formats +
+• Optional verbose modes for debugging
+
+|**Maintainability & Extensibility**|• Modular processor design with clear interfaces +
+• Comprehensive test coverage for all tools +
+• Plugin-ready architecture for future capabilities +
+• Clean separation of concerns (parsing/analysis/output)
+
+|**Compatibility & Interoperability**|• Strict MCP protocol adherence +
+• Independent process model (no shared state) +
+• Standard exit codes and signal handling +
+• Configurable resource limits
+|===
+
+=== Deployment Strategy
+
+.Primary
+Local execution for development workflows
+
+* Direct installation via pip/uvx for immediate access
+* Integrates with existing development environments
+* Full filesystem access for repository-wide analysis
+
+.Secondary
+Containerized deployment for production
+
+* Docker image for consistent execution environments  
+* Volume mounting for document access
+* Resource limits and security boundaries
+* CI/CD pipeline integration capabilities
+
+=== Key Design Principles
+
+. **Single Responsibility**: Each tool has one clear, well-defined purpose
+. **Fail Fast**: Input validation and early error detection
+. **Be Conservative**: Read-only operations, no file modifications
+. **Stay Simple**: Minimal configuration, maximum automation
+. **Think Local**: Optimized for single-user, local development scenarios

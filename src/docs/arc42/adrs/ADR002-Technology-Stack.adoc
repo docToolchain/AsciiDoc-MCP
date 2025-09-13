@@ -1,0 +1,112 @@
+= ADR-002: Technology Stack Selection - Python 3.8+ and MCP Protocol
+
+|===
+| Datum:    | 2025-01-13
+| Autoren:  | AsciiDoc MCP Development Team
+| Status:   | Accepted
+|===
+
+== Problem
+
+The AsciiDoc MCP Server requires a technology stack that balances developer productivity, ecosystem maturity, performance, and compatibility with the Model Context Protocol specification.
+
+== Alternatives Considered
+
+[options="header",cols="2,4,4,1"]
+|===
+|Technology|Pros|Cons|Score
+
+|**Python 3.8+**
+a|* Mature AsciiDoc ecosystem
+* Strong async support
+* Cross-platform compatibility
+* Rich standard library
+a|* Runtime dependency
+* Potential performance overhead
+|**+2**
+
+|**Node.js/TypeScript**
+a|* Native JSON-RPC support
+* Strong async model
+* Fast startup times
+a|* Limited AsciiDoc tooling
+* Additional build complexity
+|**0**
+
+|**Go**
+a|* Single binary deployment
+* Excellent performance
+* Strong concurrency
+a|* Minimal AsciiDoc ecosystem
+* More complex for document processing
+|**-1**
+
+|**Rust**
+a|* Maximum performance
+* Memory safety
+* Growing ecosystem
+a|* Steep learning curve
+* Limited AsciiDoc libraries
+|**-2**
+|===
+
+== Decision
+
+**Adopt Python 3.8+ as the runtime with MCP 1.0+ protocol compliance.**
+
+.Technology Components
+
+* **Runtime**: Python 3.8+ for broad compatibility
+* **Protocol**: Model Context Protocol (MCP) via JSON-RPC over stdio
+* **Architecture**: Standalone server independent of other MCP servers
+
+== Rationale
+
+.Python Selection
+
+* **Ecosystem Maturity**: Python has the most mature AsciiDoc processing libraries (asciidoc, asciidoctor.py integration)
+* **Async Support**: Native async/await enables efficient MCP protocol handling
+* **Developer Experience**: Large community, extensive documentation, and tooling support
+* **Cross-Platform**: Consistent behavior across Linux, macOS, and Windows
+
+.MCP Protocol
+
+* **Industry Standard**: Official protocol for LLM tool integration
+* **Transport Simplicity**: stdin/stdout minimizes deployment complexity
+* **Type Safety**: JSON schema validation provides contract enforcement
+* **Future-Proof**: Designed specifically for AI agent workflows
+
+== Consequences
+
+=== Positive Effects
+
+* **Rapid Development**: Leverage existing Python AsciiDoc libraries
+* **Maintainability**: Large Python developer community
+* **Compatibility**: Works across all target platforms
+* **Integration**: Seamless with all MCP-compatible LLMs
+
+=== Trade-offs
+
+* **Runtime Dependency**: Requires Python installation
+* **Performance**: Interpreted language vs. compiled alternatives
+* **Package Management**: Need to handle Python environment setup
+
+=== Risks
+
+* **Version Compatibility**: Must maintain compatibility with Python 3.8+
+* **Dependency Management**: AsciiDoc library ecosystem changes
+* **Performance Scaling**: May need optimization for large document sets
+
+== Implementation Notes
+
+.Deployment Options
+
+* **Development**: Direct Python execution with requirements.txt
+* **Production**: Docker containerization to encapsulate runtime
+* **Distribution**: Python package with uvx for easy installation
+
+.Version Support
+
+* Minimum Python 3.8 for wider compatibility
+* Target Python 3.12+ for optimal performance
+* Regular testing across supported versions
