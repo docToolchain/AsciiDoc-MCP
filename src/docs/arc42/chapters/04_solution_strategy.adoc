@@ -45,32 +45,27 @@ endif::arc42help[]
 
 === Technology Decisions
 
-[options="header",cols="2,3,3"]
+The AsciiDoc MCP Server technology stack and architectural patterns are documented in the following Architecture Decision Records:
+
+* **link:../adrs/ADR001-Idea.adoc[ADR-001: Standalone AsciiDoc MCP Server]** - Establishes the fundamental decision to create an independent AsciiDoc MCP server rather than extending existing tools
+* **link:../adrs/ADR002-Technology-Stack.adoc[ADR-002: Technology Stack Selection]** - Documents the selection of Python 3.8+ runtime and MCP protocol adoption
+* **link:../adrs/ADR003-Architecture-Pattern.adoc[ADR-003: Tool-Based Service Architecture]** - Defines the architectural pattern using tool-based services with a central processor
+
+These decisions collectively establish:
+
+[options="header",cols="2,3"]
 |===
-|Decision|Rationale|Quality Impact
-|**Python 3.8+ Runtime**|• Mature AsciiDoc processing ecosystem +
-• Strong async/await support for MCP protocol +
-• Excellent cross-platform compatibility +
-• Rich standard library for file processing|**Maintainability**: Large developer community +
-**Compatibility**: Runs on all target platforms +
-**Performance**: Efficient async I/O operations
-
-|**Model Context Protocol (MCP)**|• Industry standard for LLM tool integration +
-• JSON-RPC provides structured, typed interfaces +
-• stdin/stdout transport minimizes deployment complexity +
-• Protocol designed for AI agent workflows|**Usability**: Seamless LLM integration +
-**Interoperability**: Works with all MCP clients +
-**Reliability**: Well-defined error handling
-
-|**Standalone Server Architecture**|• Independent of existing tools (vs. Serena extension) +
-• Specialized for documentation workflows +
-• Clean separation from code analysis concerns +
-• Parallel deployment model|**Maintainability**: Clear domain boundaries +
-**Extensibility**: Documentation-focused features +
-**Reliability**: No dependency conflicts
+|Decision Area|Selected Approach
+|**Runtime Platform**|Python 3.8+ for ecosystem maturity and cross-platform compatibility
+|**Integration Protocol**|Model Context Protocol (MCP) via JSON-RPC over stdio
+|**System Architecture**|Standalone server independent of other MCP implementations
+|**Service Pattern**|Tool-based architecture with centralized AsciiDoc processor
+|**Deployment Model**|Local execution with optional Docker containerization
 |===
 
 === Architectural Patterns
+
+The system follows architectural patterns detailed in **link:../adrs/ADR003-Architecture-Pattern.adoc[ADR-003: Tool-Based Service Architecture]**:
 
 **Tool-Based Service Architecture**
 * Each MCP tool represents a distinct document analysis capability
@@ -83,6 +78,8 @@ endif::arc42help[]
 * Individual tools delegate to processor methods for consistency
 * Shared error handling and validation across all operations
 * Enables future caching and optimization strategies
+
+This approach provides the foundation for all quality achievement strategies and deployment models described below.
 
 === Quality Achievement Strategies
 

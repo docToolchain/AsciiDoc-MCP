@@ -1,0 +1,117 @@
+= ADR-003: Architectural Pattern - Tool-Based Service Architecture
+
+|===
+| Datum:    | 2025-01-13
+| Autoren:  | AsciiDoc MCP Development Team
+| Status:   | Accepted
+|===
+
+== Problem
+
+The AsciiDoc MCP Server needs an architectural pattern that provides clear service boundaries, supports independent feature evolution, and aligns with MCP protocol semantics.
+
+== Alternatives Considered
+
+[options="header",cols="2,2,2,2"]
+|===
+|Pattern|Pros|Cons|Score
+|**Tool-Based Service**|• Natural MCP alignment +
+• Clear boundaries +
+• Independent evolution +
+• Stateless operations|• Potential code duplication +
+• Inter-tool coordination complexity|**+3**
+
+|**Monolithic Service**|• Shared state +
+• Code reuse +
+• Simple deployment|• Tight coupling +
+• Difficult feature isolation +
+• MCP protocol mismatch|**-1**
+
+|**Microservice Architecture**|• Maximum isolation +
+• Independent scaling +
+• Technology diversity|• Deployment complexity +
+• Network overhead +
+• Over-engineering for scope|**-2**
+
+|**Plugin Architecture**|• Dynamic extensibility +
+• Runtime configuration +
+• Third-party extensions|• Complex lifecycle management +
+• Security concerns +
+• Unnecessary for core features|**0**
+|===
+
+== Decision
+
+**Implement a Tool-Based Service Architecture with a central Processor Pattern.**
+
+**Architecture Components:**
+- **MCP Server Handler**: Protocol communication and tool routing
+- **Tool Handlers**: Individual MCP tools with specific capabilities
+- **AsciiDoc Processor**: Shared document analysis engine
+- **File System Access**: Centralized I/O operations
+
+== Rationale
+
+**Tool-Based Benefits:**
+- **MCP Alignment**: Each MCP tool maps to a distinct service capability
+- **Clear Contracts**: JSON schema validation enforces tool boundaries
+- **Independent Evolution**: Tools can be enhanced without affecting others
+- **Testing Isolation**: Each tool can be tested independently
+
+**Processor Pattern Benefits:**
+- **Code Reuse**: Shared document parsing and analysis logic
+- **Consistency**: Uniform error handling and validation
+- **Performance**: Potential for shared caching and optimization
+- **Maintainability**: Single source of truth for AsciiDoc processing
+
+== Implementation Strategy
+
+**Tool Categories:**
+1. **Structure Analysis**: `analyze_document_structure`, `find_includes`
+2. **Content Search**: `search_content`, `extract_metadata`
+3. **Validation**: `validate_cross_references`
+4. **Asset Management**: `analyze_assets`
+
+**Processor Interface:**
+```python
+class AsciiDocProcessor:
+    async def parse_structure(self, file_path: Path) -> DocumentStructure
+    async def resolve_includes(self, file_path: Path) -> IncludeGraph
+    async def search_content(self, query: str, scope: Path) -> SearchResults
+    async def validate_references(self, file_path: Path) -> ValidationReport
+```
+
+== Consequences
+
+### Positive Effects
+- **Modularity**: Clear separation of concerns between tools
+- **Reliability**: Stateless operations prevent state corruption
+- **Extensibility**: New tools can be added without modifying existing ones
+- **Testability**: Each tool has isolated test scenarios
+
+### Design Constraints
+- **No Shared State**: Tools must be stateless to ensure reliability
+- **Consistent Error Handling**: All tools use shared error response format
+- **Schema Compliance**: All tools must provide valid MCP tool schemas
+
+### Risks
+- **Performance**: Repeated document parsing across tool calls
+- **Coordination**: Complex workflows may require multiple tool calls
+- **Code Duplication**: Common validation logic across multiple tools
+
+== Mitigation Strategies
+
+**Performance Optimization:**
+- Implement document caching in the processor layer
+- Use streaming parsers for large documents
+- Lazy loading of document sections
+
+**Workflow Coordination:**
+- Design tools for composition in LLM workflows
+- Provide rich error messages with correction hints
+- Enable optional verbose modes for debugging
+
+**Code Reuse:**
+- Centralize all document processing in the AsciiDoc Processor
+- Share validation and error handling utilities
+- Maintain clear interfaces between tools and processor

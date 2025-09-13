@@ -77,35 +77,29 @@ In the best case you will get away with examples or simple signatures.
 ****
 endif::arc42help[]
 
-```
-                                   AsciiDoc MCP Server
-┌─────────────────────────────────────────────────────────────────────────────────┐
-│                                                                                 │
-│  ┌───────────────┐    ┌─────────────────────┐    ┌─────────────────────────┐    │
-│  │               │    │                     │    │                         │    │
-│  │  MCP Server   │◄──►│  AsciiDoc Processor │◄──►│    File System          │    │
-│  │   Handler     │    │                     │    │      Access             │    │
-│  │               │    │                     │    │                         │    │
-│  └───────────────┘    └─────────────────────┘    └─────────────────────────┘    │
-│          ▲                       │                            ▲                │
-│          │ JSON-RPC               │ delegates to               │ file I/O       │
-│          │ MCP Protocol           ▼                            │                │
-│          │             ┌─────────────────────┐                │                │
-│          │             │                     │                │                │
-│          │             │   Tool Handlers     │────────────────┘                │
-│          │             │                     │                                 │
-│          │             └─────────────────────┘                                 │
-│          │                                                                     │
-└──────────┼─────────────────────────────────────────────────────────────────────┘
-           │
-           ▼ stdio transport
-  ┌───────────────┐
-  │               │
-  │  MCP Client   │
-  │ (Claude, etc) │
-  │               │
-  └───────────────┘
-```
+[plantuml, whitebox-overall, svg]
+----
+@startuml
+!theme plain
+
+package "AsciiDoc MCP Server" {
+  rectangle "MCP Server\nHandler" as Handler
+  rectangle "AsciiDoc Processor" as Processor
+  rectangle "Tool Handlers" as Tools
+  rectangle "File System\nAccess" as FileAccess
+  
+  Handler <-> Processor : delegates to
+  Processor <-> FileAccess : file I/O
+  Tools <-> FileAccess : file I/O
+  Handler -> Tools : invokes
+}
+
+rectangle "MCP Client\n(Claude, etc)" as Client
+
+Client -> Handler : stdio transport\nJSON-RPC MCP Protocol
+
+@enduml
+----
 
 Motivation::
 
