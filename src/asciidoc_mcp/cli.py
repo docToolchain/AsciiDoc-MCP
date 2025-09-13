@@ -3,12 +3,12 @@
 Command line interface for AsciiDoc MCP Server.
 """
 
-import sys
 import asyncio
 import logging
+import sys
 
-from .server import main
 from . import __version__
+from .server import main
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -20,7 +20,7 @@ def cli_main():
     if len(sys.argv) > 1 and sys.argv[1] == "--version":
         print(__version__)
         return
-    
+
     try:
         asyncio.run(main())
     except KeyboardInterrupt:

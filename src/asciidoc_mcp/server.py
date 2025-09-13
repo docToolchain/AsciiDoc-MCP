@@ -3,15 +3,13 @@ MCP Server implementation for AsciiDoc document processing.
 """
 
 import asyncio
-import logging
-from typing import Any, Dict, List, Optional, Sequence
 import json
-import sys
+import logging
+from typing import Any, Dict, List, Optional
 
-from mcp.server import Server, NotificationOptions
+from mcp import stdio_server, types
+from mcp.server import NotificationOptions, Server
 from mcp.server.models import InitializationOptions
-from mcp import stdio_server
-from mcp import types
 
 from .asciidoc_processor import AsciiDocProcessor
 
@@ -60,7 +58,7 @@ async def handle_list_tools() -> List[types.Tool]:
                         "description": "Path to the AsciiDoc file to analyze for includes"
                     },
                     "recursive": {
-                        "type": "boolean", 
+                        "type": "boolean",
                         "description": "Whether to recursively find includes in included files",
                         "default": True
                     }
@@ -113,58 +111,58 @@ async def handle_call_tool(
     name: str, arguments: Optional[Dict[str, Any]]
 ) -> List[types.TextContent]:
     """Handle tool calls for AsciiDoc processing."""
-    
+
     if not arguments:
         arguments = {}
-    
+
     try:
         if name == "analyze_document_structure":
             file_path = arguments.get("file_path")
             include_content = arguments.get("include_content", False)
-            
+
             if not file_path:
                 raise ValueError("file_path is required")
-            
+
             result = await processor.analyze_document_structure(file_path, include_content)
             return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
-            
+
         elif name == "find_includes":
             file_path = arguments.get("file_path")
             recursive = arguments.get("recursive", True)
-            
+
             if not file_path:
                 raise ValueError("file_path is required")
-            
+
             result = await processor.find_includes(file_path, recursive)
             return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
-            
+
         elif name == "extract_metadata":
             file_path = arguments.get("file_path")
-            
+
             if not file_path:
                 raise ValueError("file_path is required")
-            
+
             result = await processor.extract_metadata(file_path)
             return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
-            
+
         elif name == "search_content":
             query = arguments.get("query")
             file_path = arguments.get("file_path")
             case_sensitive = arguments.get("case_sensitive", False)
-            
+
             if not query:
                 raise ValueError("query is required")
-            
+
             result = await processor.search_content(query, file_path, case_sensitive)
             return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
-            
+
         else:
             raise ValueError(f"Unknown tool: {name}")
-            
+
     except Exception as e:
         logger.error(f"Error in tool {name}: {str(e)}")
         return [types.TextContent(
-            type="text", 
+            type="text",
             text=f"Error: {str(e)}"
         )]
 
