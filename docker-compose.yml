@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  asciidoc-mcp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      # Mount current directory as workspace for development
+      - .:/workspace
+    stdin_open: true
+    tty: true
+    environment:
+      - PYTHONUNBUFFERED=1
+    working_dir: /workspace
+    
+  # Example service for documentation processing
+  docs-processor:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      # Mount documentation directory
+      - ./src/docs:/workspace
+    stdin_open: true
+    tty: true
+    environment:
+      - PYTHONUNBUFFERED=1
+    working_dir: /workspace

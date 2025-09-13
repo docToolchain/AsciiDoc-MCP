@@ -1,0 +1,554 @@
+= AsciiDoc MCP Server Architecture
+:author: docToolchain Team
+:email: info@doctoolchain.org
+:revnumber: 1.0
+:revdate: 2025-01-27
+:toc: left
+:toclevels: 3
+:sectlinks:
+:sectanchors:
+
+[NOTE]
+====
+This architecture document implements the requirements specified in link:adrs/ADR001-Idea.adoc[ADR-001: Bereitstellung strukturierter AsciiDoc-Unterstützung für LLMs].
+====
+
+== Introduction and Goals
+
+=== Requirements Overview
+
+The AsciiDoc MCP Server provides structured access to AsciiDoc documents for Large Language Models (LLMs) through the Model Context Protocol (MCP). This enables AI assistants to understand document hierarchies, validate cross-references, analyze assets, and perform semantic operations on technical documentation.
+
+=== Quality Goals
+
+[cols="1,2,2"]
+|===
+| Priority | Quality Goal | Description
+
+| 1 | **Usability** | Simple setup for software engineers working with mixed code/documentation projects
+| 2 | **Reliability** | Robust parsing and error handling for various AsciiDoc structures  
+| 3 | **Performance** | Fast document analysis suitable for interactive AI workflows
+| 4 | **Maintainability** | Clean, modular architecture allowing independent evolution
+| 5 | **Portability** | Local execution with optional containerization
+|===
+
+[NOTE]
+====
+For detailed quality criteria and standards, see link:quality-criteria.adoc[Quality Criteria and Standards].
+====
+
+=== Stakeholders
+
+[cols="1,2,2"]
+|===
+| Role | Contact | Expectations
+
+| **Software Engineers** | Target Users | Simple integration with existing development workflows
+| **Technical Writers** | Documentation Teams | Accurate document structure analysis and cross-reference validation
+| **AI Tool Developers** | LLM Application Builders | Reliable MCP interface for document processing
+| **DevOps Engineers** | Operations Teams | Easy deployment in containerized environments
+|===
+
+== Architecture Constraints
+
+=== Technical Constraints
+
+* **MCP Protocol Compliance**: Must implement Model Context Protocol v1.0+ specification
+* **Python 3.8+ Compatibility**: Support for mainstream Python versions
+* **Single User Operation**: Designed for individual developer usage, not multi-tenant
+* **Standalone Execution**: No external database or service dependencies required
+
+=== Organizational Constraints
+
+* **Open Source**: MIT license ensuring broad compatibility
+* **Minimal Dependencies**: Lightweight installation reducing compatibility issues
+* **Standard Tools**: Uses established Python packaging and distribution mechanisms
+
+=== Conventions
+
+* **Code Style**: Black + Ruff for consistent Python formatting
+* **Testing**: pytest for automated testing with asyncio support
+* **Documentation**: AsciiDoc for all documentation (self-hosting principle)
+* **Versioning**: Semantic versioning for predictable releases
+
+== System Scope and Context
+
+=== Business Context
+
+[source]
+----
+ Software Engineer              AI Assistant
+       |                             |
+       v                             v
+  Development Environment    AI Toolchain
+  ┌─────────────────────┐   ┌─────────────────────┐
+  │ • Code Repository   │   │ • LLM Client        │
+  │ • Documentation     │   │ • AsciiDoc MCP      │
+  │ • Build System      │   │   Server            │
+  └─────────────────────┘   └─────────────────────┘
+            |                         |
+            └─── Document Analysis ───┘
+                    (MCP Protocol)
+----
+
+The AsciiDoc MCP Server operates within the broader ecosystem of development tools, enabling AI assistants to understand and work with technical documentation alongside code.
+
+**Key Interactions:**
+- Software engineers write code and documentation
+- AI assistants access structured document information via MCP
+- Seamless integration with existing development workflows
+
+=== Technical Context
+
+[source]
+----
+  MCP Client                    AsciiDoc MCP Server             File System
+  (Claude Desktop)                                              (.adoc files)
+       │                              │                              │
+       │──── tool calls ────────────→ │                              │
+       │    (JSON-RPC over            │ ──── read/analyze ─────────→ │
+       │     stdio/http)              │                              │
+       │                              │ ←──── content ──────────────│
+       │ ←── structured data ─────────│                              │
+       │     (JSON responses)         │                              │
+       │                              │                              │
+----
+
+**Protocol Details:**
+- **Transport**: Standard input/output (stdio) or HTTP
+- **Format**: JSON-RPC 2.0 messages following MCP specification
+- **Tools Provided**:
+  * `analyze_document_structure` - Parse heading hierarchies
+  * `find_includes` - Resolve include dependencies
+  * `extract_metadata` - Extract document attributes
+  * `search_content` - Search with context
+
+== Solution Strategy
+
+=== Technology Decisions
+
+[cols="1,2,2"]
+|===
+| Decision | Technology | Rationale
+
+| **Runtime** | Python 3.8+ | Mature ecosystem, strong text processing, MCP SDK availability
+| **Protocol** | Model Context Protocol | Standard for LLM tool integration, future-proof
+| **Packaging** | setuptools + pyproject.toml | Modern Python packaging, pip/uvx compatibility
+| **Testing** | pytest + pytest-asyncio | Async testing support, industry standard
+| **Containerization** | Docker | Standardized deployment, isolation, reproducibility
+|===
+
+=== Architectural Patterns
+
+==== Layered Architecture
+
+The system follows a clean layered architecture:
+
+[source]
+----
+┌─────────────────────────────────────────┐
+│              Interface Layer            │
+│  ┌─────────────────┐ ┌─────────────────┐ │
+│  │ CLI Entry Point │ │   MCP Server    │ │
+│  └─────────────────┘ └─────────────────┘ │
+└─────────────────────────────────────────┘
+                      │
+                      v
+┌─────────────────────────────────────────┐
+│             Application Layer           │
+│  ┌─────────────────┐ ┌─────────────────┐ │
+│  │  Tool Handlers  │ │ AsciiDoc        │ │
+│  │                 │ │ Processor       │ │
+│  └─────────────────┘ └─────────────────┘ │
+└─────────────────────────────────────────┘
+                      │
+                      v
+┌─────────────────────────────────────────┐
+│           Infrastructure Layer          │
+│  ┌─────────────────┐ ┌─────────────────┐ │
+│  │ File System     │ │ Regex Parsers   │ │
+│  │ Access          │ │                 │ │
+│  └─────────────────┘ └─────────────────┘ │
+└─────────────────────────────────────────┘
+----
+
+==== Tool-Based Interface
+
+Each MCP tool represents a specific document analysis capability:
+
+* **Separation of Concerns**: Each tool has a single responsibility
+* **Composability**: Tools can be combined for complex workflows  
+* **Extensibility**: New tools can be added without affecting existing ones
+
+== Building Block View
+
+=== Level 1: System Overview
+
+[source]
+----
+┌──────────────────────────────────────┐
+│          AsciiDoc MCP Server         │
+│                                      │
+│  ┌─────────────┐  ┌─────────────────┐│
+│  │MCP Interface│  │Document         ││
+│  │             │  │Processor        ││
+│  └─────────────┘  └─────────────────┘│
+│         │                  ^         │
+│         └──────delegates────┘         │
+│                                      │
+│  ┌─────────────┐                     │
+│  │CLI Interface│                     │
+│  │             │                     │
+│  └─────────────┘                     │
+│         │                            │
+│         └────starts server───────────┘│
+└──────────────────────────────────────┘
+----
+
+=== Level 2: Core Components
+
+[source]
+----
+MCP Interface:
+┌─────────────────────────────────────────────────┐
+│ Tool Registry → Request Handler → Response       │
+│                                   Formatter      │
+└─────────────────────────────────────────────────┘
+                      │
+                      v
+Document Processor:
+┌─────────────────────────────────────────────────┐
+│ Structure   Include    Metadata    Content       │
+│ Analyzer    Resolver   Extractor   Searcher      │
+└─────────────────────────────────────────────────┘
+                      ^
+                      │
+CLI Interface:
+┌─────────────────────────────────────────────────┐
+│ Argument Parser ──→ Server Launcher              │
+└─────────────────────────────────────────────────┘
+----
+
+=== Level 3: Processing Details
+
+[source]
+----
+Structure Analyzer:
+┌─────────────────────────────────────────────────┐
+│ Heading Parser ──→ Hierarchy Builder ──→ Content│
+│                                         Extractor│
+└─────────────────────────────────────────────────┘
+
+Include Resolver:
+┌─────────────────────────────────────────────────┐
+│ Include Finder ──→ Path Resolver ──→ Dependency │
+│                                      Tracker     │
+└─────────────────────────────────────────────────┘
+
+Metadata Extractor:
+┌─────────────────────────────────────────────────┐
+│ Attribute Parser ──→ Document Title Extractor   │
+│        │                                        │
+│        └──────────→ File Info Collector         │
+└─────────────────────────────────────────────────┘
+
+Content Searcher:
+┌─────────────────────────────────────────────────┐
+│ Pattern Matcher ──→ Context Provider ──→ Result │
+│                                          Aggregator│
+└─────────────────────────────────────────────────┘
+----
+
+== Runtime View
+
+=== Tool Execution Flow
+
+[source]
+----
+MCP Client ──→ MCP Server ──→ Tool Handler ──→ AsciiDoc Processor ──→ File System
+     │              │              │                    │                   │
+     │              │              │                    │ ←─ file_content ──┘
+     │              │              │                    │
+     │              │              │ ←─ structured_result ┘
+     │              │              │
+     │              │ ←─ json_response ┘
+     │              │
+     │ ←─ tool_response ┘
+
+Flow Steps:
+1. Client sends tool_call(name, args) via MCP protocol
+2. Server routes to appropriate tool handler
+3. Handler delegates to AsciiDoc processor with parameters
+4. Processor reads file content from file system
+5. Processor parses content and analyzes structure
+6. Structured result returned to handler
+7. Handler formats response as JSON
+8. Server sends tool response back to client
+----
+
+=== Include Resolution Process
+
+[source]
+----
+Include Resolver Process:
+
+1. find_include_directives() in document content
+   ↓
+2. For each include directive found:
+   ↓
+3. resolve_relative_path(include_path, base_path)
+   ↓
+4. file_exists(absolute_path) check
+   ↓
+5. If file exists and recursive enabled:
+   ↓
+6. check_circular_dependency(absolute_path)
+   ↓
+7. If no circular dependency detected:
+   ↓
+8. process_nested_includes(absolute_path)
+   ↓
+9. Return complete dependency tree
+
+Dependency Tracking:
+┌─────────────────────────────────────────────────┐
+│ Main Document                                   │
+│   ├── include1.adoc (depth 0)                   │
+│   │   └── nested.adoc (depth 1)                 │
+│   └── include2.adoc (depth 0)                   │
+│       └── shared.adoc (depth 1, already seen)   │
+└─────────────────────────────────────────────────┘
+
+Circular Dependency Detection:
+- Track visited files by absolute path
+- Prevent infinite recursion with depth limits
+- Return dependency chain on circular reference detection
+----
+
+== Deployment View
+
+=== Local Development Setup
+
+[source]
+----
+Developer Machine:
+┌─────────────────────────────────────────────────┐
+│                                                 │
+│  ┌─────────────┐    ┌─────────────────────────┐  │
+│  │ Python 3.8+ │────│ AsciiDoc MCP Server     │  │
+│  └─────────────┘    └─────────────────────────┘  │
+│         ^                        │               │
+│         │                        v               │
+│  ┌─────────────┐            ┌───────────────┐    │
+│  │ pip/uvx     │            │ Project Repo  │    │
+│  │ installer   │            │ ├─ *.adoc     │    │
+│  └─────────────┘            │ └─ source code│    │
+│                             └───────────────┘    │
+│                                     ^            │
+│  ┌─────────────────────────┐         │           │
+│  │ MCP Client              │─────────┘           │
+│  │ (Claude Desktop, etc.)  │                     │
+│  └─────────────────────────┘                     │
+└─────────────────────────────────────────────────┘
+----
+
+Installation commands:
+[source,bash]
+----
+# From source
+git clone https://github.com/docToolchain/AsciiDoc-MCP.git
+cd AsciiDoc-MCP
+pip install -e .
+
+# Using uvx (recommended)
+uvx --from git+https://github.com/docToolchain/AsciiDoc-MCP asciidoc-mcp-server
+----
+
+=== Docker Deployment
+
+[source]
+----
+Host System:
+┌─────────────────────────────────────────────────┐
+│                                                 │
+│  ┌─────────────┐    ┌─────────────────────────┐  │
+│  │ Docker      │────│ AsciiDoc MCP Container  │  │
+│  │ Engine      │    │                         │  │
+│  └─────────────┘    └─────────────────────────┘  │
+│                                 │                │
+│                                 v                │
+│                     ┌───────────────┐           │
+│                     │ Mounted Volume│           │
+│                     │ ├─ *.adoc     │           │
+│                     │ └─ docs/      │           │
+│                     └───────────────┘           │
+│                             ^                   │
+│  ┌─────────────────────────┐ │                   │
+│  │ MCP Client              │─┘                   │
+│  │ (stdio connection)      │                     │
+│  └─────────────────────────┘                     │
+└─────────────────────────────────────────────────┘
+----
+
+Docker usage:
+[source,bash]
+----
+# Build image
+docker build -t asciidoc-mcp .
+
+# Run with mounted documentation
+docker run -v /path/to/docs:/workspace asciidoc-mcp
+
+# Use in MCP client configuration
+{
+  "mcpServers": {
+    "asciidoc-mcp": {
+      "command": "docker",
+      "args": ["run", "-i", "-v", "/path/to/docs:/workspace", "asciidoc-mcp"]
+    }
+  }
+}
+----
+
+=== Combined with Serena MCP
+
+For comprehensive code and documentation analysis:
+
+[source,json]
+----
+{
+  "mcpServers": {
+    "serena": {
+      "command": "uvx",
+      "args": ["--from", "git+https://github.com/oraios/serena", "serena-mcp-server"]
+    },
+    "asciidoc-mcp": {
+      "command": "uvx", 
+      "args": ["--from", "git+https://github.com/docToolchain/AsciiDoc-MCP", "asciidoc-mcp-server"]
+    }
+  }
+}
+----
+
+== Cross-cutting Concepts
+
+=== Error Handling Strategy
+
+[cols="1,2,2"]
+|===
+| Error Type | Handling Approach | User Experience
+
+| **File Not Found** | Return structured error response | Clear message with file path
+| **Parse Errors** | Graceful degradation, partial results | Warnings with successfully parsed content  
+| **Circular Includes** | Detection and prevention | Error with dependency chain details
+| **Permission Errors** | Clear error messaging | Actionable guidance for resolution
+|===
+
+=== Logging and Monitoring
+
+* **Structured Logging**: JSON format for easy parsing
+* **Log Levels**: INFO for operations, DEBUG for development, ERROR for failures
+* **Performance Metrics**: Document processing times, file access patterns
+* **Health Checks**: File system accessibility, parser functionality
+
+=== Security Considerations
+
+* **Path Traversal Protection**: Validate and sanitize file paths
+* **Resource Limits**: Prevent infinite recursion in includes
+* **Input Validation**: Sanitize all user-provided parameters
+* **Sandboxing**: Container deployment for isolation
+
+== Design Decisions
+
+=== Standalone vs. Plugin Architecture
+
+**Decision**: Standalone MCP server
+**Rationale**: 
+* Independent evolution and release cycles
+* Simpler deployment and configuration
+* Focused specialization on AsciiDoc processing
+* Avoids complexity of plugin architectures
+
+=== Synchronous vs. Asynchronous Processing
+
+**Decision**: Asynchronous processing with async/await
+**Rationale**:
+* MCP protocol supports async operations
+* Better performance for I/O-heavy document processing
+* Future scalability for concurrent requests
+* Consistent with modern Python practices
+
+=== In-Memory vs. Cached Processing
+
+**Decision**: In-memory processing without persistent caching
+**Rationale**:
+* Simpler architecture and deployment
+* Documents change frequently during development
+* Memory usage remains reasonable for typical projects
+* Eliminates cache invalidation complexity
+
+== Quality Requirements
+
+=== Performance
+
+* **Document Analysis**: < 100ms for typical AsciiDoc files (< 10MB)
+* **Include Resolution**: < 500ms for dependency trees with 50+ files
+* **Search Operations**: < 200ms for full-text search in large documents
+* **Memory Usage**: < 100MB for processing typical documentation projects
+
+=== Reliability
+
+* **Error Recovery**: Graceful handling of malformed AsciiDoc content
+* **Robustness**: Continue processing despite individual file errors
+* **Data Integrity**: Accurate parsing of AsciiDoc structure and metadata
+* **Consistency**: Deterministic results for identical inputs
+
+=== Usability
+
+* **Setup Time**: < 5 minutes from installation to first successful analysis
+* **Learning Curve**: Intuitive tool names and parameter structures
+* **Error Messages**: Clear, actionable feedback for common issues
+* **Documentation**: Complete examples for all supported use cases
+
+=== Maintainability
+
+* **Code Coverage**: > 90% test coverage for core functionality
+* **Code Quality**: Automated linting and formatting enforcement
+* **Dependencies**: Minimal external dependencies to reduce maintenance burden
+* **Modularity**: Clear separation between MCP interface and processing logic
+
+== Risks and Technical Debt
+
+=== Identified Risks
+
+[cols="1,2,2,1"]
+|===
+| Risk | Impact | Mitigation | Probability
+
+| **AsciiDoc Parsing Complexity** | Limited feature support | Incremental parser improvement, community feedback | Medium
+| **MCP Protocol Changes** | Breaking compatibility | Version pinning, migration guides | Low  
+| **Performance with Large Files** | Poor user experience | Streaming processing, size limits | Medium
+| **Include Circular Dependencies** | Infinite loops | Detection algorithms, depth limits | Low
+|===
+
+=== Technical Debt
+
+* **Parser Limitations**: Currently uses regex-based parsing; consider proper AST parser for complex documents
+* **Memory Management**: No streaming for very large documents
+* **Concurrency**: Single-threaded processing limits scalability
+* **Configuration**: Hard-coded limits and options should be configurable
+
+== Glossary
+
+[cols="1,3"]
+|===
+| Term | Definition
+
+| **MCP** | Model Context Protocol - standard for LLM tool integration
+| **AsciiDoc** | Lightweight markup language for technical documentation
+| **Include Directive** | AsciiDoc feature for embedding one document within another
+| **Cross-reference** | Link between sections within or across AsciiDoc documents
+| **Document Hierarchy** | Tree structure of headings and sections in a document
+| **Tool** | Individual MCP capability exposed to LLM clients
+| **Stdio Transport** | MCP communication method using standard input/output
+|===
