@@ -128,70 +128,115 @@ endif::arc42help[]
 
 ==== Reliability & Error Handling Scenarios
 
-[options="header",cols="1,2,2,2"]
+[options="header",cols="1,2,3,3"]
 |===
 |ID|Scenario|Stimulus|Expected Response
-|R1|**Malformed Document Processing**|User provides AsciiDoc file with syntax errors, broken includes, or invalid attributes|System returns structured error information including error location, type, and suggestions. Processing continues for valid portions of the document.
 
-|R2|**Missing Include Files**|Document references include files that don't exist or are not accessible|System reports missing includes with file paths, continues processing main document, provides partial results with clear indication of missing content.
+|R1|**Malformed Document Processing**
+|User provides AsciiDoc file with syntax errors, broken includes, or invalid attributes
+|System returns structured error information including error location, type, and suggestions. Processing continues for valid portions of the document.
 
-|R3|**Large File Handling**|User attempts to analyze document exceeding 10MB size limit|System gracefully rejects request with clear error message indicating size limit and current file size. No system crash or resource exhaustion.
+|R2|**Missing Include Files**
+|Document references include files that don't exist or are not accessible
+|System reports missing includes with file paths, continues processing main document, provides partial results with clear indication of missing content.
 
-|R4|**Concurrent Request Processing**|Multiple MCP clients send simultaneous requests|Each request processed independently without interference. Response times remain within SLA. No data corruption or mixed responses.
+|R3|**Large File Handling**
+|User attempts to analyze document exceeding 10MB size limit
+|System gracefully rejects request with clear error message indicating size limit and current file size. No system crash or resource exhaustion.
+
+|R4|**Concurrent Request Processing**
+|Multiple MCP clients send simultaneous requests
+|Each request processed independently without interference. Response times remain within SLA. No data corruption or mixed responses.
 |===
 
 ==== Performance & Efficiency Scenarios
 
-[options="header",cols="1,2,2,2"]
+[options="header",cols="1,2,3,3"]
 |===
 |ID|Scenario|Stimulus|Expected Response
-|P1|**Standard Document Analysis**|User requests structure analysis of typical 1MB documentation file with 50 headings and 10 includes|System completes analysis and returns results within 2 seconds. Memory usage stays below 50MB during processing.
 
-|P2|**Search Performance**|User performs content search across 100-file documentation project (total 50MB)|Search completes within 5 seconds. Results include context and relevance ranking. Memory usage scales linearly with file count.
+|P1|**Standard Document Analysis**
+|User requests structure analysis of typical 1MB documentation file with 50 headings and 10 includes
+|System completes analysis and returns results within 2 seconds. Memory usage stays below 50MB during processing.
 
-|P3|**Include Resolution Performance**|Document with 5-level deep includes (50+ files total)|Complete dependency resolution within 3 seconds. Circular dependency detection without infinite loops. Clear dependency graph in response.
+|P2|**Search Performance**
+|User performs content search across 100-file documentation project (total 50MB)
+|Search completes within 5 seconds. Results include context and relevance ranking. Memory usage scales linearly with file count.
 
-|P4|**Memory Efficiency**|Processing multiple large documents in sequence|Memory usage resets between requests. No memory leaks detected after 1000 operations. Peak memory stays under 100MB per request.
+|P3|**Include Resolution Performance**
+|Document with 5-level deep includes (50+ files total)
+|Complete dependency resolution within 3 seconds. Circular dependency detection without infinite loops. Clear dependency graph in response.
+
+|P4|**Memory Efficiency**
+|Processing multiple large documents in sequence
+|Memory usage resets between requests. No memory leaks detected after 1000 operations. Peak memory stays under 100MB per request.
 |===
 
 ==== Usability & Developer Experience Scenarios
 
-[options="header",cols="1,2,2,2"]
+[options="header",cols="1,2,3,3"]
 |===
 |ID|Scenario|Stimulus|Expected Response
-|U1|**Self-Documentation**|Developer discovers tool via MCP client tool list|Tool descriptions, input schemas, and examples are clear enough for immediate use without external documentation. All parameters clearly documented.
 
-|U2|**Clear Error Messages**|User provides invalid file path or malformed parameters|Error messages include specific problem description, expected format, and correction suggestions. Error response follows consistent JSON schema.
+|U1|**Self-Documentation**
+|Developer discovers tool via MCP client tool list
+|Tool descriptions, input schemas, and examples are clear enough for immediate use without external documentation. All parameters clearly documented.
 
-|U3|**Integration Setup**|New user adds AsciiDoc MCP to Claude Desktop configuration|Installation works on first try with provided configuration examples. Clear troubleshooting guidance for common issues.
+|U2|**Clear Error Messages**
+|User provides invalid file path or malformed parameters
+|Error messages include specific problem description, expected format, and correction suggestions. Error response follows consistent JSON schema.
 
-|U4|**Debugging Support**|User encounters unexpected results from document analysis|Verbose mode provides detailed processing steps. Intermediate results available for troubleshooting. Clear logging without sensitive information exposure.
+|U3|**Integration Setup**
+|New user adds AsciiDoc MCP to Claude Desktop configuration
+|Installation works on first try with provided configuration examples. Clear troubleshooting guidance for common issues.
+
+|U4|**Debugging Support**
+|User encounters unexpected results from document analysis
+|Verbose mode provides detailed processing steps. Intermediate results available for troubleshooting. Clear logging without sensitive information exposure.
 |===
 
 ==== Maintainability & Extension Scenarios
 
-[options="header",cols="1,2,2,2"]
+[options="header",cols="1,2,3,3"]
 |===
 |ID|Scenario|Stimulus|Expected Response
-|M1|**New Tool Addition**|Developer adds cross-reference validation tool|New tool integrates through existing processor interface. No changes to server handler or existing tools. Full test coverage achievable.
 
-|M2|**Protocol Updates**|MCP protocol specification adds new features|System architecture supports protocol updates without core logic changes. Backward compatibility maintained for existing clients.
+|M1|**New Tool Addition**
+|Developer adds cross-reference validation tool
+|New tool integrates through existing processor interface. No changes to server handler or existing tools. Full test coverage achievable.
 
-|M3|**Testing & Validation**|Continuous integration runs full test suite|All tests complete within 30 seconds. Coverage reports show >90% code coverage. Integration tests validate MCP protocol compliance.
+|M2|**Protocol Updates**
+|MCP protocol specification adds new features
+|System architecture supports protocol updates without core logic changes. Backward compatibility maintained for existing clients.
 
-|M4|**Code Quality Maintenance**|Developer modifies processor logic|Linting, type checking, and formatting tools ensure code quality. Clear module boundaries prevent coupling issues. Documentation updates automatically verified.
+|M3|**Testing & Validation**
+|Continuous integration runs full test suite
+|All tests complete within 30 seconds. Coverage reports show >90% code coverage. Integration tests validate MCP protocol compliance.
+
+|M4|**Code Quality Maintenance**
+|Developer modifies processor logic
+|Linting, type checking, and formatting tools ensure code quality. Clear module boundaries prevent coupling issues. Documentation updates automatically verified.
 |===
 
 ==== Compatibility & Interoperability Scenarios
 
-[options="header",cols="1,2,2,2"]
+[options="header",cols="1,2,3,3"]
 |===
 |ID|Scenario|Stimulus|Expected Response
-|I1|**Multi-MCP Operation**|User runs AsciiDoc MCP alongside Serena MCP in same client session|Both MCPs operate independently without interference. LLM can orchestrate workflows using both servers. No resource conflicts or coordination issues.
 
-|I2|**Platform Compatibility**|User installs and runs on Windows, macOS, and Linux|Identical functionality across all platforms. File path handling adapts to OS conventions. No platform-specific dependencies.
+|I1|**Multi-MCP Operation**
+|User runs AsciiDoc MCP alongside Serena MCP in same client session
+|Both MCPs operate independently without interference. LLM can orchestrate workflows using both servers. No resource conflicts or coordination issues.
 
-|I3|**Python Version Support**|User runs with Python 3.8, 3.9, 3.10, 3.11, 3.12|Full functionality available across supported Python versions. Dependency compatibility maintained. No version-specific bugs.
+|I2|**Platform Compatibility**
+|User installs and runs on Windows, macOS, and Linux
+|Identical functionality across all platforms. File path handling adapts to OS conventions. No platform-specific dependencies.
 
-|I4|**Container Deployment**|DevOps team deploys in Docker container with volume mounts|Container starts successfully with mounted documentation directories. Performance equivalent to native execution. Resource limits respected.
+|I3|**Python Version Support**
+|User runs with Python 3.8, 3.9, 3.10, 3.11, 3.12
+|Full functionality available across supported Python versions. Dependency compatibility maintained. No version-specific bugs.
+
+|I4|**Container Deployment**
+|DevOps team deploys in Docker container with volume mounts
+|Container starts successfully with mounted documentation directories. Performance equivalent to native execution. Resource limits respected.
 |===

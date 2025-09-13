@@ -78,19 +78,41 @@ The core architectural decisions for the AsciiDoc MCP Server are documented as A
 
 === Secondary Architectural Decisions
 
-[options="header",cols="2,2,2,1"]
+[options="header",cols="2,3,4,1"]
 |===
 |Decision|Alternatives Considered|Rationale|Impact
-|**Python 3.8+ Runtime**|Node.js, Go, Rust|Mature AsciiDoc ecosystem, async/await support, cross-platform compatibility|Medium
-|**MCP Protocol Compliance**|Custom protocol, gRPC, REST API|Industry standard for LLM integration, JSON-RPC simplicity, tool ecosystem|High  
-|**Stateless Processing**|Session-based, cached processing|Reliability, concurrency, simple deployment|Medium
-|**Read-Only File Access**|Full file system access|Security, predictability, side-effect prevention|Low
-|**Tool-Based Architecture**|Monolithic API, plugin system|MCP protocol alignment, clear capabilities, extensibility|High
+
+|**Python 3.8+ Runtime**
+|Node.js, Go, Rust
+|Mature AsciiDoc ecosystem, async/await support, cross-platform compatibility
+|Medium
+
+|**MCP Protocol Compliance**
+|Custom protocol, gRPC, REST API
+|Industry standard for LLM integration, JSON-RPC simplicity, tool ecosystem
+|High
+
+|**Stateless Processing**
+|Session-based, cached processing
+|Reliability, concurrency, simple deployment
+|Medium
+
+|**Read-Only File Access**
+|Full file system access
+|Security, predictability, side-effect prevention
+|Low
+
+|**Tool-Based Architecture**
+|Monolithic API, plugin system
+|MCP protocol alignment, clear capabilities, extensibility
+|High
 |===
 
 === Future Decisions
 
-**Pending Decisions** (to be documented as ADRs when addressed):
+.Pending Decisions
+
+(to be documented as ADRs when addressed):
 
 1. **Cross-Reference Validation Implementation** - Algorithm choice for link validation and circular reference detection
 2. **Asset Analysis Capabilities** - Scope and depth of image/diagram analysis features  
@@ -98,5 +120,6 @@ The core architectural decisions for the AsciiDoc MCP Server are documented as A
 4. **Multi-Format Support** - Extension to Markdown and other markup formats
 5. **Performance Optimization** - Streaming vs. batch processing for large document sets
 
-**Decision Process**:
+.Decision Process
+
 All significant architectural decisions follow the ADR template and are stored in `src/docs/arc42/adrs/` for traceability and stakeholder review.
