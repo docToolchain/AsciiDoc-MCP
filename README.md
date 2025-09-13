@@ -6,6 +6,16 @@ A Model Context Protocol (MCP) server that provides structured access to AsciiDo
 
 This MCP server implements the architecture outlined in [ADR-001](src/docs/arc42/adrs/ADR001-Idea.adoc) for providing specialized AsciiDoc document analysis capabilities to LLMs. It enables AI assistants to understand document structure, resolve include dependencies, validate cross-references, and perform semantic analysis of AsciiDoc content.
 
+## Documentation
+
+📚 **[Architecture Documentation](https://doctoolchain.github.io/AsciiDoc-MCP/)** - Comprehensive arc42-based documentation including:
+- Architecture decisions and rationale
+- System context and building blocks
+- Runtime and deployment views
+- Technical concepts and crosscutting concerns
+
+The documentation is automatically generated from AsciiDoc sources using [docToolchain](https://doctoolchain.org/) and published to GitHub Pages.
+
 ## Features
 
 The server provides the following tools:
@@ -142,6 +152,7 @@ Searches for content with context, showing surrounding lines for better understa
 - Python 3.8+
 - MCP SDK
 - AsciiDoc Python package
+- Java 11+ (for documentation generation)
 
 ### Setup Development Environment
 
@@ -162,6 +173,34 @@ pytest
 black src/
 ruff check src/
 ```
+
+### Documentation Development
+
+This project uses [docToolchain](https://doctoolchain.org/) for documentation generation:
+
+1. **Generate documentation locally:**
+```bash
+# Install dependencies (if not already done)
+sudo apt-get install openjdk-17-jre-headless
+
+# Generate HTML documentation
+./dtcw generateHTML
+
+# Generate PDF documentation  
+./dtcw generatePDF
+
+# Generate microsite (for GitHub Pages)
+./dtcw generateMicrosite
+```
+
+2. **Preview documentation:**
+```bash
+# Open generated documentation
+open build/docs/html5/arc42-template.html
+```
+
+3. **Publish to GitHub Pages:**
+Documentation is automatically published to GitHub Pages via the CI/CD pipeline when changes are pushed to the main branch.
 
 ### Architecture
 

@@ -1,4 +1,4 @@
-# Byte-compiled / optimized / DLL files
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
@@ -150,3 +150,11 @@ cython_debug/
 Thumbs.db
 ehthumbs.db
 Desktop.ini
+
+# docToolchain build artifacts
+.doctoolchain/
+gradle-wrapper.jar
+
+# Temporary files
+*.tmp
+*.temp
