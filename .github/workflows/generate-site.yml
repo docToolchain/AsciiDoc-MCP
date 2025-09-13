@@ -12,8 +12,11 @@ on:
       - '.github/workflows/generate-site.yml'
 
 jobs:
-  generate-site:
+  build-and-deploy:
     runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -25,24 +28,10 @@ jobs:
         run: |
           ./dtcw docker generateSite
 
-      - name: Deploy to GitHub Pages
-        uses: actions/configure-pages@v4
-
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v2
         with:
           path: build/
 
-  deploy:
-    needs: generate-site
-    runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
       - name: Deploy to GitHub Pages
-        id: deployment
         uses: actions/deploy-pages@v3
