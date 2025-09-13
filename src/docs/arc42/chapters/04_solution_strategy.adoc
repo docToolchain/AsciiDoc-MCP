@@ -114,12 +114,16 @@ This approach provides the foundation for all quality achievement strategies and
 
 === Deployment Strategy
 
-**Primary**: Local execution for development workflows
+.Primary
+Local execution for development workflows
+
 * Direct installation via pip/uvx for immediate access
 * Integrates with existing development environments
 * Full filesystem access for repository-wide analysis
 
-**Secondary**: Containerized deployment for production
+.Secondary
+Containerized deployment for production
+
 * Docker image for consistent execution environments  
 * Volume mounting for document access
 * Resource limits and security boundaries

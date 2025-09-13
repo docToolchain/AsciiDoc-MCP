@@ -52,27 +52,33 @@ The core architectural decisions for the AsciiDoc MCP Server are documented as A
 
 === ADR-001: Standalone AsciiDoc MCP Server
 
-**Decision**: Develop a standalone AsciiDoc MCP server instead of extending existing tools like Serena MCP.
+.Decision
+Develop a standalone AsciiDoc MCP server instead of extending existing tools like Serena MCP.
 
-**Status**: ✅ Decided and Implemented
+.Status
+✅ Decided and Implemented
 
-**Context**: 
+.Context
+
 * Need for specialized AsciiDoc document intelligence for LLMs
 * Existing tools focus on code analysis, not documentation semantics  
 * Serena MCP has single language server limitation
 * Documentation workflows require different optimization than code analysis
 
-**Decision Rationale**:
+.Decision Rationale
+
 * **Specialization**: Dedicated focus on AsciiDoc-specific features
 * **Architecture Clarity**: Clean separation from code analysis concerns
 * **Parallel Operation**: Can work alongside Serena for combined workflows
 * **Independent Evolution**: No constraints from code-focused roadmaps
 
-**Consequences**:
+.Consequences
+
 * ✅ **Positive**: Optimal AsciiDoc feature development, clear domain boundaries, parallel MCP deployment
 * ⚠️ **Risks**: Additional development effort, community building needed, coordination overhead
 
-**References**: 
+.References
+
 * Full decision details: link:../adrs/ADR001-Idea.adoc[ADR-001: Standalone AsciiDoc MCP Server]
 * Implementation: Current system architecture in Chapters 4-5
 

@@ -120,7 +120,7 @@ Contained Building Blocks::
 | **File System Access** | Secure file I/O, path validation, encoding handling, resource management
 |===
 
-Important Interfaces::
+.Important Interfaces
 
 * **MCP Protocol Interface**: JSON-RPC over stdio, strict schema compliance
 * **Tool API Interface**: Async Python methods with typed parameters and return values  
@@ -166,27 +166,27 @@ according the the following black box template:
 ****
 endif::arc42help[]
 
-**Purpose/Responsibility**
+.Purpose/Responsibility
 
 Manages the Model Context Protocol communication layer, providing the bridge between LLM clients and the AsciiDoc processing capabilities. Handles protocol compliance, request lifecycle management, and response formatting.
 
-**Interface(s)**
+.Interface(s)
 
 * **Input**: JSON-RPC requests via stdin (tool calls, server introspection)
 * **Output**: JSON-RPC responses via stdout (tool results, error messages)  
 * **Internal**: Delegates to Tool Handlers for request processing
 
-**Quality/Performance Characteristics**
+.Quality/Performance Characteristics
 
 * **Reliability**: Comprehensive error handling with graceful degradation
 * **Performance**: Stateless processing enables concurrent request handling
 * **Protocol Compliance**: Full MCP 1.0+ specification adherence
 
-**Directory/File Location**
+.Directory/File Location
 
 `src/asciidoc_mcp/server.py` - Main server implementation and request routing
 
-**Fulfilled Requirements**
+.Fulfilled Requirements
 
 * MCP protocol compatibility for LLM integration
 * Error handling and status reporting
@@ -270,7 +270,7 @@ The AsciiDoc Processor is the most complex building block, containing the core d
 | **Error Handler** | Graceful error recovery, structured error reporting, validation
 |===
 
-**Internal Interfaces:**
+.Internal Interfaces
 
 * **Parser Interface**: Text input → Token stream
 * **Analysis Interface**: Tokens → Structured data

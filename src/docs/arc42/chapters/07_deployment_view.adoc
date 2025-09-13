@@ -110,15 +110,16 @@ endif::arc42help[]
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-**Motivation:**
+.Motivation
 
 Local development deployment optimizes for:
-- **Zero Network Latency**: Direct file system access eliminates network overhead
-- **Developer Privacy**: Documents remain on local machine, no external transmission  
-- **Simple Setup**: Single command installation with no additional infrastructure
-- **IDE Integration**: Works alongside existing development tools and workflows
 
-**Quality and/or Performance Features:**
+* **Zero Network Latency**: Direct file system access eliminates network overhead
+* **Developer Privacy**: Documents remain on local machine, no external transmission  
+* **Simple Setup**: Single command installation with no additional infrastructure
+* **IDE Integration**: Works alongside existing development tools and workflows
+
+.Quality and/or Performance Features
 
 [cols="2,3" options="header"]
 |===
@@ -164,15 +165,16 @@ Local development deployment optimizes for:
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-**Motivation:**
+.Motivation
 
 Containerized deployment provides:
-- **Environment Isolation**: Consistent runtime regardless of host OS differences
-- **Resource Control**: CPU and memory limits for production environments
-- **Security Boundaries**: Process isolation and controlled filesystem access
-- **CI/CD Integration**: Reproducible builds and automated testing environments
 
-**Quality and/or Performance Features:**
+* **Environment Isolation**: Consistent runtime regardless of host OS differences
+* **Resource Control**: CPU and memory limits for production environments
+* **Security Boundaries**: Process isolation and controlled filesystem access
+* **CI/CD Integration**: Reproducible builds and automated testing environments
+
+.Quality and/or Performance Features
 
 [cols="2,3" options="header"]
 |===
